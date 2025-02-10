@@ -1,0 +1,119 @@
+﻿@{ ViewBag.Title = "WebPage";
+    ViewBag.HideNavbar = true;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+    <style>
+        
+        body {
+            background-image: url('..//Content/Pics/BG.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            color: white;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        
+        .navbar {
+            display: flex;
+            align-items: center;
+            background-color: #333;
+            padding: 10px 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .navbar-logo img {
+            height: 10px;
+            margin-right: auto;
+        }
+
+        .navbar-links a {
+            color: white;
+            margin: 0 0px;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+            .navbar-links a:hover {
+                color: #00BFFF;
+            }
+
+        .blue-bar {
+            background-color: #00BFFF;
+            height: 0px;
+            width: 100%;
+        }
+
+        
+        .content {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+            height: 80vh;
+            padding: 0px;
+            color: #00BFFF;
+            text-align: right; 
+        }
+
+            .content h1 {
+                font-size: 36px;
+                font-weight: bold;
+                margin: 0;
+            }
+
+            .content p {
+                font-size: 18px;
+                max-width: 500px;
+                margin: 20px 0;
+            }
+
+            .content button {
+                background-color: #00BFFF;
+                border: none;
+                color: white;
+                padding: 10px 20px;
+                font-size: 16px;
+                cursor: pointer;
+                border-radius: 5px;
+            }
+
+                .content button:hover {
+                    background-color: #007ACC;
+                }
+    </style>
+</head>
+<body>
+    
+    <div class="navbar">
+        <a href="http://localhost/iAttendance/Home/WebPage"><img src="~/Content/Pics/Logo.png" alt="Company Logo"></a>
+        <div class="navbar-links">
+            @*<a href="#">Product</a>
+            <a href="#">Uses</a>
+            <a href="#">Integrations</a>
+            <a href="#">Resources</a>
+            <a href="#">Apps</a>*@
+        </div>
+     </div>
+    <div class="blue-bar">
+        <a href="#">Hi</a>
+    </div>
+
+    
+    <div class="blue-bar"></div>
+
+    
+    <div class="content">
+        <h1>Say Goodbye to Buddy Punching</h1>
+        <p>iAttendance verifies each team member accurately with advanced face recognition technology, so you can eliminate buddy punching and time thefts once and for all, with advanced face recognition technology.</p>
+        <button>Get Started</button>
+    </div>
+</body>
+</html>

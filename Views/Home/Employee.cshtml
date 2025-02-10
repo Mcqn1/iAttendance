@@ -1,0 +1,244 @@
+﻿@model List<iAttendance.Models.EmployeeModel>
+@{
+    ViewBag.Title = "Employee Details";
+}
+
+<style>
+    body {
+        background: none;
+        color: black;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+
+    h2 {
+        text-align: center;
+        margin-top: 30px;
+        font-size: 24px;
+        color: #333;
+    }
+
+    table {
+        width: 80%;
+        margin: 20px auto;
+        border-collapse: collapse;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+        padding: 15px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f4f4f4;
+        font-weight: bold;
+        color: #333;
+    }
+
+    td {
+        background-color: #fafafa;
+    }
+
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    img {
+        width: 200px;
+        height: 200px;
+        border-radius: 8px;
+    }
+
+    span {
+        font-style: italic;
+        color: #888;
+    }
+
+    .error-message {
+        text-align: center;
+        color: red;
+        font-size: 18px;
+    }
+
+    .search-box {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+        .search-box input {
+            padding: 10px;
+            font-size: 16px;
+            width: 50%;
+            max-width: 400px;
+        }
+
+        .search-box button {
+            padding: 10px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+            .search-box button:hover {
+                background-color: #0056b3;
+            }
+
+    .pagination-controls {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+        .pagination-controls button {
+            padding: 10px 20px;
+            margin: 0 5px;
+            border: 1px solid #ddd;
+            background-color: #f4f4f4;
+            cursor: pointer;
+        }
+
+            .pagination-controls button:hover {
+                background-color: #007bff;
+                color: white;
+            }
+
+            .pagination-controls button.active {
+                font-weight: bold;
+                background-color: #007bff;
+                color: white;
+            }
+</style>
+
+<h2>Employee Details</h2>
+
+<div class="search-box">
+    <input type="text" id="searchInput" placeholder="Search by Name or Employee Number" onkeyup="searchEmployee()" />
+</div>
+
+@if (Model == null || !Model.Any())
+{
+    <p class="error-message">No employees found.</p>
+}
+else
+{
+    <table id="employeeTable">
+        <tr>
+            <th>Employee Number</th>
+            <th>Employee Name</th>
+            <th>Image</th>
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Emp_No</td>
+                <td>@item.Emp_Name</td>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.Img))
+                    {
+                        <img src="@item.Img" alt="Employee Image" />
+                    }
+                    else
+                    {
+                        <span>No Image Available</span>
+                    }
+                </td>
+            </tr>
+        }
+    </table>
+
+    <div id="paginationControls" class="pagination-controls"></div>
+}
+
+<script>
+    var currentPage = 1;
+    var rowsPerPage = 5;
+
+    function paginateTable(pageNumber) {
+        var table, tr, totalRows, startRow, endRow;
+        table = document.getElementById('employeeTable');
+        tr = table.getElementsByTagName('tr');
+        totalRows = tr.length - 1; // Exclude the header row
+        var totalPages = Math.ceil(totalRows / rowsPerPage);
+
+        // Calculate the start and end row for the current page
+        startRow = (pageNumber - 1) * rowsPerPage + 1;
+        endRow = Math.min(pageNumber * rowsPerPage, totalRows);
+
+        // Show or hide rows based on pagination
+        for (var i = 1; i <= totalRows; i++) {
+            if (i >= startRow && i <= endRow) {
+                tr[i].style.display = '';
+            } else {
+                tr[i].style.display = 'none';
+            }
+        }
+
+        // Update the pagination controls
+        updatePaginationControls(pageNumber, totalPages);
+    }
+
+    function updatePaginationControls(currentPage, totalPages) {
+        var paginationControls = document.getElementById('paginationControls');
+        paginationControls.innerHTML = ''; // Clear current controls
+
+        // Add previous button
+        if (currentPage > 1) {
+            paginationControls.innerHTML += `<button onclick="paginateTable(${currentPage - 1})">Previous</button>`;
+        }
+
+        // Add page number buttons
+        for (var i = 1; i <= totalPages; i++) {
+            paginationControls.innerHTML += `<button onclick="paginateTable(${i})" ${i === currentPage ? 'class="active"' : ''}>${i}</button>`;
+        }
+
+        // Add next button
+        if (currentPage < totalPages) {
+            paginationControls.innerHTML += `<button onclick="paginateTable(${currentPage + 1})">Next</button>`;
+        }
+    }
+
+    function searchEmployee() {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById('searchInput');
+        filter = input.value.toUpperCase();
+        table = document.getElementById('employeeTable');
+        tr = table.getElementsByTagName('tr');
+
+        var matchedRows = [];
+
+        for (i = 1; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName('td');
+            var matchFound = false;
+
+            for (var j = 0; j < td.length; j++) {
+                if (td[j]) {
+                    txtValue = td[j].textContent || td[j].innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        matchFound = true;
+                        break;
+                    }
+                }
+            }
+
+            
+            if (matchFound) {
+                matchedRows.push(tr[i]);
+            } else {
+                tr[i].style.display = 'none';
+            }
+        }
+
+        
+        paginateTable(1);
+    }
+
+    // Initialize the page
+    window.onload = function () {
+        paginateTable(1); // Start with the first page
+    };
+</script>

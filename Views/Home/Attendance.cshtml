@@ -1,0 +1,129 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<body>
+    <h2>Attendance Verification</h2>
+
+    <div class="video-container">
+        <video id="webcam" width="320" height="240" autoplay></video>
+        <img id="capturedImage" alt="Captured Image" />
+    </div>
+    <canvas id="canvas" width="320" height="240" style="display: none;"></canvas>
+
+    <div class="message" id="message"></div>
+    <button id="captureButton">Punch</button>
+
+    <script>
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+    const captureButton = document.getElementById('captureButton');
+    const messageDiv = document.getElementById('message');
+    const capturedImage = document.getElementById('capturedImage');
+    let stream;
+
+    // Generate a unique device ID and store it in localStorage (for persistence across sessions)
+    const deviceId = localStorage.getItem('deviceId') || generateDeviceId();
+    localStorage.setItem('deviceId', deviceId); // Save the deviceId for future use
+
+    // Function to generate a unique device ID (UUID)
+    function generateDeviceId() {
+        return 'device-' + Math.random().toString(36).substr(2, 9); // Simple random string generator
+    }
+
+    // Function to start the video stream
+    function startVideo() {
+        video.style.display = 'block';
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then((mediaStream) => {
+                stream = mediaStream;
+                video.srcObject = stream;
+            })
+            .catch((error) => {
+                console.error('Error accessing the webcam', error);
+            });
+    }
+
+    // Start the video on page load
+    startVideo();
+
+    // Event listener for the capture button
+    captureButton.addEventListener('click', () => {
+        // Fetch system details
+        const systemId = navigator.a; // You can refine this as per your needs
+
+        // Capture the current frame from the video
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convert the canvas image to Base64 format
+        const imageData = canvas.toDataURL('image/png');
+
+        // Display the captured image
+        capturedImage.src = imageData;
+        capturedImage.style.display = 'block';
+
+        // Stop the video stream
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            video.srcObject = null;
+        }
+
+        video.style.display = 'none';
+
+        fetch('https://api.ipify.org?format=json')
+            .then(response => response.json())
+            .then(ipData => {
+                const ipAddress = ipData.ip;
+
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(position => {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+
+                        // Debugging
+                        console.debug('System ID:', systemId, 'Device ID:', deviceId, 'IP Address:', ipAddress, 'Lat:', latitude, 'Lon:', longitude);
+
+                        const baseUrl = '@Url.Content("~/")';
+                        fetch(`${baseUrl}Attendance/CaptureImage`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                imageData: imageData,
+                                ipAddress: ipAddress,
+                                latitude: latitude,
+                                longitude: longitude,
+                                systemId: systemId,
+                                deviceId: deviceId 
+                            })
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    messageDiv.textContent = `Employee: ${data.EmployeeName}, Status: ${data.status}, EmpNo: ${data.EmpNo}, Distance: ${data.Distance}, Device ID: ${data.DeviceId}, IP: ${ipAddress}, Location: (${latitude}, ${longitude})`;
+                                    messageDiv.className = 'message verified';
+
+                                    setTimeout(() => {
+                                        messageDiv.textContent = '';
+                                        messageDiv.className = 'message';
+                                        capturedImage.style.display = 'none';
+                                        startVideo();
+                                    }, 5000);
+                                } else {
+                                    messageDiv.textContent = data.message;
+                                    messageDiv.className = 'message try-again';
+                                }
+                            })
+                            .catch(error => console.error('Error:', error));
+                    }, error => console.error('Geolocation Error:', error));
+                } else {
+                    console.error('Geolocation not supported by this browser.');
+                }
+            })
+            .catch(error => console.error('Failed to fetch IP:', error));
+    });
+    </script>
+
+</body>
+</html>

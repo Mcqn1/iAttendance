@@ -1,0 +1,164 @@
+﻿@model iAttendance.Models.RegistrationModel
+
+@{
+    ViewBag.Title = "Registration";
+}
+
+<h2>Registration</h2>
+
+<main aria-labelledby="title" style="padding: 20px;">
+    <h2 id="title" style="color: #f8f9fa; text-align: center; margin-bottom: 30px;">@ViewBag.Title</h2>
+    <section class="registration-section" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
+        <div class="form-container" style="flex: 1; background-color: #2b2d42; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);">
+            <form id="registrationForm" method="post">
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label for="EmployeeNo" style="color: #f8f9fa;">Employee Number</label>
+                    <input type="text" id="EmployeeNo" name="EmployeeNo" class="form-control" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #555; background-color: #3b3f45; color: #fff;"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '');" />
+                </div>
+
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label for="EmployeeName" style="color: #f8f9fa;">Employee Name</label>
+                    <input type="text" id="EmployeeName" name="EmployeeName" class="form-control" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #555; background-color: #3b3f45; color: #fff;"
+                           oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '');" />
+                </div>
+
+                <input type="hidden" id="capturedImage" name="StrImageURL" />
+
+                <button type="button" class="btn btn-success" onclick="submitForm()" style="background-color: #28a745; border: none; padding: 10px 20px; border-radius: 5px; color: #fff; cursor: pointer; transition: background-color 0.3s;">
+                    Submit
+                </button>
+
+                <button type="button" onclick="window.location.href='@Url.Action("Index", "Home")'" class="btn btn-danger" style="background-color: #dc3545; border: none; padding: 10px 20px; border-radius: 5px; color: #fff; cursor: pointer; transition: background-color 0.3s; margin-left: 10px;">
+                    Cancel
+                </button>
+            </form>
+
+            @if (ViewBag.ErrorMessage != null)
+            {
+                <div class="alert alert-danger" style="margin-top: 15px; color: #f8d7da; background-color: #721c24; padding: 10px; border-radius: 5px;">
+                    @ViewBag.ErrorMessage
+                </div>
+            }
+            @if (ViewBag.SuccessMessage != null)
+            {
+                <div class="alert alert-success" style="margin-top: 15px; color: #d4edda; background-color: #155724; padding: 10px; border-radius: 5px;">
+                    @ViewBag.SuccessMessage
+                </div>
+            }
+        </div>
+
+        <div class="webcam-section" style="flex: 1; background-color: #2b2d42; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); text-align: center;">
+            <h3 style="color: #f8f9fa; margin-bottom: 15px;">Capture Image</h3>
+            <div class="video-and-preview" style="display: flex; align-items: center; justify-content: center; gap: 20px;">
+                <video id="webcam" width="320" height="240" autoplay style="border: 2px solid #fff; border-radius: 5px;"></video>
+                <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+
+                <!-- Captured Image Preview (Positioned to the Right of the Video) -->
+                <img id="capturedImagePreview" src="" alt="Captured Image" style="width: 320px; height: 240px; border: 2px solid #fff; border-radius: 5px; display: none;" />
+            </div>
+
+            <div style="margin-top: 15px;">
+                <button type="button" id="captureButton" class="btn btn-primary" style="background-color: #007bff; border: none; padding: 10px 20px; border-radius: 5px; color: #fff; cursor: pointer; transition: background-color 0.3s;">
+                    Capture Photo
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        const video = document.getElementById('webcam');
+        const canvas = document.getElementById('canvas');
+        const captureButton = document.getElementById('captureButton');
+        const capturedImageInput = document.getElementById('capturedImage');
+        const capturedImagePreview = document.getElementById('capturedImagePreview');
+
+        // Access webcam
+        function startWebcam() {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function (stream) {
+                    video.srcObject = stream;
+                })
+                .catch(function (err) {
+                    console.error("Error accessing webcam: " + err.message);
+                    alert("Unable to access the webcam. Please check your permissions and try again. Error: " + err.message);
+                });
+        }
+
+        // Capture image from webcam
+        captureButton.addEventListener('click', function () {
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, 320, 240);
+
+            const dataUrl = canvas.toDataURL('image/png');
+            capturedImageInput.value = dataUrl; // Set the base64 image in the hidden input
+            capturedImagePreview.src = dataUrl; // Set the image preview source
+            capturedImagePreview.style.display = 'block'; // Display the captured image
+            alert("Photo Captured!");
+        });
+
+        // Function to handle form submission
+        function submitForm() {
+            const employeeNo = $("#EmployeeNo").val();
+            const employeeName = $("#EmployeeName").val();
+            const strImageURL = capturedImageInput.value;
+
+            // Log values for debugging
+            console.log("Employee No:", employeeNo);
+            console.log("Employee Name:", employeeName);
+            console.log("Captured Image URL:", strImageURL);
+
+            // Create the data object to send
+            const modelparams = {
+                EmployeeNo: employeeNo,
+                EmployeeName: employeeName,
+                StrImageURL: strImageURL
+            };
+
+            $.ajax({
+                url: "@Url.Action("RegisterFace", "Registration")",
+                cache: false,
+                type: "POST",
+                data: modelparams,
+                success: function (data) {
+                    alert(data.message);
+                },
+                error: function (e) {
+                    alert("Error: " + e.responseText);
+                }
+            });
+        }
+
+        // Start the webcam when the page loads
+        document.addEventListener('DOMContentLoaded', startWebcam);
+    </script>
+
+    <style>
+        body {
+            background-color: #1e1e2f;
+            font-family: 'Roboto', sans-serif;
+            color: #f8f9fa;
+            margin: 0;
+        }
+
+        .form-control {
+            background-color: #3b3f45;
+            color: #fff;
+        }
+
+        .btn-primary:hover, .btn-success:hover, .btn-danger:hover {
+            opacity: 0.8;
+        }
+
+        .registration-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .form-container, .webcam-section {
+            background-color: #2b2d42;
+        }
+    </style>
+</main>

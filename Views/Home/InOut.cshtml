@@ -1,0 +1,53 @@
+﻿@model iAttendance.Models.PaginatedAttendanceReport
+
+<h2>Attendance Report</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Employee No</th>
+            <th>Employee Name</th>
+            <th>Total IN</th>
+            <th>Total OUT</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var report in Model.Reports)
+        {
+            <tr>
+                <td>@report.EmpNo</td>
+                <td>@report.EmpName</td>
+                <td>@report.TotalIn</td>
+                <td>@report.TotalOut</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="pagination">
+    @if (Model.TotalPages > 1)
+    {
+        <ul>
+            @if (Model.CurrentPage > 1)
+            {
+                <li>
+                    <a href="@Url.Action("AttendanceReport", new { page = Model.CurrentPage - 1 })">Previous</a>
+                </li>
+            }
+
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="@(i == Model.CurrentPage ? "active" : "")">
+                    <a href="@Url.Action("AttendanceReport", new { page = i })">@i</a>
+                </li>
+            }
+
+            @if (Model.CurrentPage < Model.TotalPages)
+            {
+                <li>
+                    <a href="@Url.Action("AttendanceReport", new { page = Model.CurrentPage + 1 })">Next</a>
+                </li>
+            }
+        </ul>
+    }
+</div>

@@ -1,0 +1,113 @@
+﻿@model iAttendance.Models.LoginView
+@{
+
+}
+
+<h2>Login</h2>
+
+<main aria-labelledby="title">
+    <h2 id="title">@ViewBag.Title</h2>
+
+    <section class="login-section" style="display: flex; justify-content: center; align-items: flex-start;">
+        <div class="form-container" style="flex: 1; max-width: 400px; margin: auto;">
+            @using (Html.BeginForm("Login", "Login", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <div class="form-group">
+                    @Html.LabelFor(m => m.Username)
+                    @Html.TextBoxFor(m => m.Username, new { @class = "form-control", required = "required" })
+
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(m => m.Password)
+                    @Html.PasswordFor(m => m.Password, new { @class = "form-control", required = "required" })
+
+                </div>
+
+                <button type="submit" class="btn btn-success">Login</button>
+            }
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                var errorMessage = ViewData.ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .FirstOrDefault()?.ErrorMessage;
+
+                if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div id="errorMessage" class="alert">@errorMessage</div>
+                }
+            }
+        </div>
+    </section>
+
+    <style>
+        body {
+            background-color: #1e1e2f;
+            color: #f8f9fa;
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-size: 2em;
+            text-align: center;
+        }
+
+        .form-container {
+            background-color: #2a2a38;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #444;
+            color: #fff;
+        }
+
+            .form-control:focus {
+                outline: none;
+                border: 2px solid #007bff;
+            }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+            .btn:hover {
+                background-color: #0056b3;
+            }
+
+        .alert {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 5px;
+        }
+    </style>
+</main>
+
+
